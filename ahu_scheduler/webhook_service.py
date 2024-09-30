@@ -91,7 +91,7 @@ class CourseReminderBot:
         self.load_courses()
         self.schedule_weekly_update()
         setup_msg=(
-            f"少爷，您的课程管家已上线！\n"
+            f"主人，您的课程管家已上线！\n"
             f"当前周数：{self.current_week}\n"
             f"提前提醒分钟数：{self.reminder_minutes}\n"
             f"已加载 {len(self.course_schedule)} 门课程\n"
@@ -101,7 +101,7 @@ class CourseReminderBot:
         # 按照星期排序courses_msg
         courses_msg=""
         for i in range(1,8):
-            courses_msg+=f"{'——'*7}\n星期{weeks_list[i-1]}\n"
+            courses_msg+=f"{'——'*7}\n{' '*20}星期{weeks_list[i-1]}\n"
             exist=False
             for course in self.course_schedule:
                 if course['day_of_week']==i:
