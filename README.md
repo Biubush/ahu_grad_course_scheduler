@@ -45,13 +45,13 @@
 
 进入群聊->群成员列表->右键对应机器人->查看资料->Webhook地址
 
-![](https://github.com/Biubush/ahu_grad_course_scheduler/blob/main/src/picture4.png?raw=true)
+![](https://github.com/Biubush/ahu_grad_course_scheduler/blob/main/src/picture5.png?raw=true)
 
 2. 手机端
 
 进入群聊->右上角三个点->群机器人->点击对应机器人->Webhook地址
 
-![](https://github.com/Biubush/ahu_grad_course_scheduler/blob/main/src/picture5.png?raw=true)
+![](https://github.com/Biubush/ahu_grad_course_scheduler/blob/main/src/picture4.png?raw=true)
 
 **记录下这个webhook地址，等会需要填进配置**
 
