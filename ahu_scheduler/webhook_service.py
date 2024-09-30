@@ -175,7 +175,7 @@ class CourseReminderBot:
         
         try:
             content = (
-                f"少爷，您有一门课即将开始：\n"
+                f"主人，您有一门课即将开始：\n"
                 f"- 课程名称：{course['name']}\n"
                 f"- 上课时间：{course['start_time']} - {course['end_time']}\n"
                 f"- 上课地点：{course['location']}\n"
