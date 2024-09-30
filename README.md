@@ -31,13 +31,13 @@
 
 电脑端内部群聊->右上方三个点->添加群机器人，可以新建机器人，图标和名称自定义
 
-![](https://wework.qpic.cn/wwpic/868508_4dgIgzTdS-65Db0_1659594009/0)
+![](https://github.com/Biubush/ahu_grad_course_scheduler/blob/main/src/picture2.png?raw=true)
 
 2. 手机端
 
 手机端内部群聊->右上角三个点->添加群机器人
 
-![](https://wework.qpic.cn/wwpic/657379_ToFmtAL7QaSmIJL_1659594297/0)
+![](https://github.com/Biubush/ahu_grad_course_scheduler/blob/main/src/picture3.png?raw=true)
 
 获取webhook地址
 
@@ -45,13 +45,13 @@
 
 进入群聊->群成员列表->右键对应机器人->查看资料->Webhook地址
 
-![](https://wework.qpic.cn/wwpic/834386_YwjNl7xXRFGljK2_1659594353/0)
+![](https://github.com/Biubush/ahu_grad_course_scheduler/blob/main/src/picture4.png?raw=true)
 
 2. 手机端
 
 进入群聊->右上角三个点->群机器人->点击对应机器人->Webhook地址
 
-![](https://wework.qpic.cn/wwpic3az/962903_L2oGjlA8RoeY2i__1722505783/0)
+![](https://github.com/Biubush/ahu_grad_course_scheduler/blob/main/src/picture5.png?raw=true)
 
 **记录下这个webhook地址，等会需要填进配置**
 
