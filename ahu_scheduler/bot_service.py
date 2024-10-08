@@ -1,74 +1,19 @@
 import json
 import logging
-import time
-import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 from functools import partial
-import os
 from .web_driver import get_courses
+import os
 
-
-class WeChatBot:
-    """
-    企业微信群机器人客户端，只可以发送文本消息
-
-    :param webhook_urls: webhook URL的列表，可以传入一个或多个webhook URL。
-    """
-
-    def __init__(self, webhook_urls):
-        if isinstance(webhook_urls, str):
-            # 如果只传入一个webhook URL，将其转换为列表
-            self.webhook_urls = [webhook_urls]
-        else:
-            self.webhook_urls = webhook_urls
-
-    def send_text(self, content, mentioned_list=None, mentioned_mobile_list=None):
-        """
-        发送文本消息。
-
-        :param content: 消息内容。
-        :param mentioned_list: 要@的成员ID列表。
-        :param mentioned_mobile_list: 要@的成员手机号列表。
-        """
-        data = {
-            "msgtype": "text",
-            "text": {
-                "content": content,
-                "mentioned_list": mentioned_list or [],
-                "mentioned_mobile_list": mentioned_mobile_list or [],
-            },
-        }
-        return self._send(data, "text")
-
-    def _send(self, data, msg_type, webhook_url=None):
-        """
-        发送消息到指定的webhook URL。
-
-        :param data: 要发送的消息数据。
-        :param msg_type: 消息类型。
-        :param webhook_url: 要发送的webhook URL，如果不指定，则发送到所有webhook URLs。
-        """
-        if webhook_url is None:
-            webhooks = self.webhook_urls
-        else:
-            webhooks = [webhook_url]
-
-        for webhook in webhooks:
-            headers = {"Content-Type": "application/json"}
-            response = requests.post(webhook, headers=headers, data=json.dumps(data))
-            if response.status_code != 200 or response.json()["errcode"] != 0:
-                print(f"Error sending {msg_type} message: {response.json()}")
-                return False
-        return True
-
+from WeworkBot import *
 
 class CourseReminderBot:
     def __init__(
         self,
         config_file: str = "config.json",
         course_file: str = "courses.json",
-        log_file: str = "course_scheduler.log",
+        log_file: str = "course_reminder.log",
     ):
         """
         初始化课程提醒机器人实例
@@ -77,7 +22,6 @@ class CourseReminderBot:
         :param course_file: 课程文件路径
         :param log_file: 日志文件路径
         """
-        self.config_file = config_file
         self.setup_logging(log_file)
         self.load_config(config_file)
         self.course_file = course_file
@@ -85,8 +29,6 @@ class CourseReminderBot:
             logging.error("课程文件不存在，开始获取课程信息")
             get_courses(self.student_id, self.password, course_file)
             logging.info(f"课程信息获取成功，保存到 {course_file}")
-
-        self.bot = WeChatBot(self.webhook_urls)
         self.scheduler = BackgroundScheduler()
         self.load_courses()
         self.schedule_weekly_update()
@@ -97,20 +39,7 @@ class CourseReminderBot:
             f"已加载 {len(self.course_schedule)} 门课程\n"
             f"请耐心等待课程提醒消息，竭诚为您服务！"
         )
-        weeks_list=['一','二','三','四','五','六','日']
-        # 按照星期排序courses_msg
-        courses_msg=""
-        for i in range(1,8):
-            courses_msg+=f"{'——'*7}\n{' '*20}星期{weeks_list[i-1]}\n"
-            exist=False
-            for course in self.course_schedule:
-                if course['day_of_week']==i:
-                    courses_msg+=f"{'-'*30}\n课程名称：{course['name']}\n上课周数：{course['start_week']} - {course['end_week']}\n上课时间：{course['start_time']} - {course['end_time']}\n上课地点：{course['location']}\n任课教师：{course['teacher']}\n"
-                    exist=True
-            if not exist:
-                courses_msg+="无课程\n"
-        self.bot.send_text(setup_msg)
-        self.bot.send_text(f"载入的课程数据如下：\n"+courses_msg)
+        msg_server.send_text_message("JiYuan",setup_msg)
 
     def setup_logging(self, log_file):
         """
@@ -125,6 +54,8 @@ class CourseReminderBot:
             encoding="utf-8",
         )
         logging.getLogger("apscheduler").setLevel(logging.WARNING)
+        logging.getLogger("flask").setLevel(logging.WARNING)
+        logging.getLogger("werkzeug").setLevel(logging.WARNING)
 
     def load_config(self, config_file):
         """
@@ -135,11 +66,11 @@ class CourseReminderBot:
         try:
             with open(config_file, "r", encoding="utf-8") as file:
                 config = json.load(file)
-                self.student_id = config.get("student_id", "")
-                self.password = config.get("password", "")
                 self.webhook_urls = config.get("webhook_urls", [])
                 self.current_week = config.get("current_week", 1)
                 self.reminder_minutes = config.get("reminder_minutes", 30)
+                self.student_id = config.get("student_id", "")
+                self.password = config.get("password", "")
                 logging.info(
                     f"当前周数：{self.current_week}，提醒分钟数：{self.reminder_minutes}"
                 )
@@ -182,7 +113,7 @@ class CourseReminderBot:
                 f"- 任课教师：{course['teacher']}\n\n"
                 f"请及时参加课程，祝学习愉快！"
             )
-            if self.bot.send_text(content):
+            if msg_server.send_text_message("JiYuan",content):
                 logging.info(f"已发送提醒消息：{course['name']} 的课程即将开始")
             else:
                 logging.error(f"发送提醒消息失败：{course['name']} 的课程即将开始")
@@ -249,12 +180,11 @@ class CourseReminderBot:
         更新当前周数，并保存到配置文件
         """
         self.current_week += 1
-        tmp_data=None
-        with open(self.course_file, "r", encoding="utf-8") as file:
-            tmp_data=json.load(file)
-        tmp_data["current_week"]=self.current_week
-        with open(self.course_file, "w", encoding="utf-8") as file:
-            json.dump(tmp_data,file,ensure_ascii=False,indent=4)
+        with open("config.json", "r", encoding="utf-8") as file:
+            config = json.load(file)
+            config["current_week"] = self.current_week
+        with open("config.json", "w", encoding="utf-8") as file:
+            json.dump(config, file, ensure_ascii=False, indent=4)
         logging.info(f"当前周数已更新为：{self.current_week}")
 
     def schedule_weekly_update(self):
@@ -279,14 +209,19 @@ class CourseReminderBot:
         try:
             self.scheduler.start()
             logging.info("调度器已启动")
-            while True:
-                time.sleep(1)
         except (KeyboardInterrupt, SystemExit):
             self.scheduler.shutdown()
             logging.info("调度器已关闭")
 
 
-# 使用示例
-if __name__ == "__main__":
+def start_bot_server():
+    """
+    启动服务
+    """
     reminder_bot = CourseReminderBot()
     reminder_bot.run()
+    msg_server.start_server()
+
+# 使用示例
+if __name__ == "__main__":
+    start_bot_server()

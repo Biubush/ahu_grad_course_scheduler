@@ -1,9 +1,0 @@
-{
-    "student_id":"YOUR_STUDENT_ID",
-    "password":"YOUR_PASSWORD",
-    "current_week": 1,
-    "reminder_minutes":30,
-    "webhook_urls": [
-        "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxxxxx-xxxxxxx-xxxxxx-xxxx-xxxxxxxxx"
-    ]
-}
